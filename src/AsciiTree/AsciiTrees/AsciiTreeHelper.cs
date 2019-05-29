@@ -12,6 +12,13 @@ namespace Demos.AsciiTrees
         public const string _vertical = " │ ";
         public const string _space = "   ";
 
+        public AsciiTreeHelper()
+        {
+            EscapePaths = new List<string>();
+        }
+
+        public IList<string> EscapePaths { get; set; }
+
         public int MaxPrintDeep { get; set; }
 
         public void ProcessNode(AsciiTree node, string indent, StringBuilder sb, int currentDeep)
@@ -87,8 +94,12 @@ namespace Demos.AsciiTrees
 
         private void AppendDirectory(AsciiTree node, DirectoryInfo directoryInfo)
         {
-            node.Name = directoryInfo.Name;
+            if (ShouldEscape(directoryInfo))
+            {
+                return;
+            }
 
+            node.Name = directoryInfo.Name;
             AppendFiles(node, directoryInfo.GetFiles());
             
             //child dir
@@ -105,13 +116,41 @@ namespace Demos.AsciiTrees
             {
                 return;
             }
+
             //child files
             foreach (var fileInfo in fileInfos)
             {
+                if (ShouldEscape(fileInfo))
+                {
+                    continue;
+                }
                 var childFileNode = new AsciiTree();
                 childFileNode.Name = fileInfo.Name;
                 node.Children.Add(childFileNode);
             }
+        }
+
+        private bool ShouldEscape(FileSystemInfo info)
+        {
+            if (info == null || EscapePaths == null || EscapePaths.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var escapePath in EscapePaths)
+            {
+                if (escapePath == null)
+                {
+                    return true;
+                }
+                var fileInfo = new FileInfo(escapePath);
+                if (info.FullName.Equals(fileInfo.FullName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

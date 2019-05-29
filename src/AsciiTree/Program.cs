@@ -10,6 +10,9 @@ namespace Demos
         static void Main(string[] args)
         {
             var asciiTreeHelper = new AsciiTreeHelper();
+            var codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            var exeFileInfo = new FileInfo(new Uri(codeBase).AbsolutePath);
+            asciiTreeHelper.EscapePaths.Add(exeFileInfo.FullName);
             var appendRoot = !Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("_noroot");
             var asciiTreeText = asciiTreeHelper.GetCurrentDirectoryAsciiTreeText(appendRoot);
             Console.WriteLine(asciiTreeText);
